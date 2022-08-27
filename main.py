@@ -11,16 +11,27 @@ def create_paper(size: Tuple[int, int] = (2480, 3508)):
     return Image.new("RGBA", size, color="white")
 
 
-def get_letter_image(letter: str) -> Image:
-    pic_amount: int = 4  # Amount of pictures of each letter
-    # There's `pic_amount * 2` pictures of each letter in each folder
-    # THe first `pic_amount` images are for uppercase and the last `pic_amount` images are for lowercase letters
-    if letter.isupper():
-        pic: int = random.randint(1, pic_amount)
+def get_char_image(char: str) -> Image:
+    pic_amount: int = 4  # Amount of pictures of each char
+    # There's `pic_amount * 2` pictures of each char in each folder
+    # The first `pic_amount` images are for uppercase and the last `pic_amount` images are for lowercase letters
+    for _ in range(1):
+
+        # Check if character is a number
+        if char.isdigit():
+            break
+
+        # Check if character is an uppercase letter
+        if char.isalpha():
+            pic: int = random.randint(1, pic_amount) if char.isupper() else \
+                random.randint(pic_amount + 1, pic_amount * 2)
+            path: str = f"{pathlib.Path(__file__).parent}\\Characters\\letters\\{char.upper()}\\{pic}.png"
+            break
     else:
-        pic: int = random.randint(pic_amount + 1, pic_amount * 2)
-    image: Image = Image.open(f"{pathlib.Path(__file__).parent}\\Characters\\letters\\{letter.upper()}\\{pic}.png")
-    image.show()
+        print(f"'{char}' was not found.")
+        return
+
+    return Image.open(path)
 
 
 def main():
@@ -29,8 +40,8 @@ def main():
 
     contents: List[str] = read_file.get_file_contents()
     for paragraph in contents:
-        for letter in paragraph:
-            get_letter_image(letter=letter)
+        for char in paragraph:
+            get_char_image(char=char)
 
 
 if __name__ == '__main__':
