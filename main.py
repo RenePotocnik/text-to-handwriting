@@ -1,10 +1,10 @@
 import pathlib
 import random
+import tkinter
+from tkinter import filedialog
 from typing import List, Tuple, Dict
 
 from PIL import Image
-
-import read_file
 
 
 misc_chars: Dict[str, str] = {
@@ -17,6 +17,34 @@ misc_chars: Dict[str, str] = {
 
 def create_paper(size: Tuple[int, int] = (2480, 3508)):
     return Image.new("RGBA", size, color="white")
+
+
+def get_file() -> str:
+    """
+    Open file explorer, wait for user to open a `.txt` file
+
+    :return: The `.txt` file directory
+    """
+    print("Open a `.txt` file.", end="\r")
+    root = tkinter.Tk()
+    root.withdraw()
+    file_path: str = filedialog.askopenfilename(filetypes=[("Text File", "*.txt")])
+    root.destroy()
+    # Clear the last line
+    print(" " * 20, end="\r")
+    return file_path
+
+
+def read_file(file_path: str) -> List[str]:
+    """
+    Read the file on the entered `file_path`, return a list of all the paragraphs
+
+    :param file_path: Location of `.txt` file
+    :return: List of read lines
+    """
+    with open(file_path, "r") as file:
+        contents: List[str] = file.readlines()
+    return contents
 
 
 def get_char_image(char: str) -> Image:
@@ -60,7 +88,7 @@ def get_char_image(char: str) -> Image:
 def main():
     paper = create_paper()
     paper.show()
-    contents: List[str] = read_file.get_file_contents()
+    contents: List[str] = read_file(get_file())
     for paragraph in contents:
         for char in paragraph:
             get_char_image(char=char)
