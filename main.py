@@ -153,7 +153,6 @@ def main():
             if x >= paper_size[0] - x_margin:
                 y += new_line
                 x = x_margin
-                continue
             char: Image = get_char_image(char=char)
             if char == "space":
                 x += kerning
