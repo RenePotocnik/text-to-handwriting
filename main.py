@@ -6,20 +6,22 @@ from typing import List, Tuple, Dict, Optional
 
 from PIL import Image
 
-
 misc_chars: Dict[str, str] = {
-                ".": "dot",
-                "?": "question",
-                '"': "quote",
-                "/": "slash"
-            }
+    ".": "dot",
+    "?": "question",
+    '"': "quote",
+    "/": "slash"
+}
 
 
-def create_paper(size: Tuple[int, int]):
-    return Image.new("RGBA", size, color="white")
+def create_paper(size: Tuple[int, int], background_image=None):
+    paper: Image = Image.new("RGBA", size, color="white")
+    if background_image:
+        paper.paste(background_image)
+    return paper
 
 
-def get_file() -> str:
+def get_file(suffix: str = ".txt") -> str:
     """
     Open file explorer, wait for user to open a `.txt` file
 
@@ -29,7 +31,7 @@ def get_file() -> str:
     root = tkinter.Tk()
     root.withdraw()
     root.attributes("-topmost", 1)
-    file_path: str = filedialog.askopenfilename(filetypes=[("Text File", "*.txt")])
+    file_path: str = filedialog.askopenfilename(filetypes=[("Text File", f"*{suffix}")])
     root.destroy()
     # Clear the last line
     print(" " * 20, end="\r")
@@ -135,7 +137,9 @@ def main():
 
     paper_size: Tuple[int, int] = (2480, 3508)  # Size of the main paper in pixels (A4)
 
-    paper = create_paper(size=(2480, 3508))
+    paper = create_paper(size=(2480, 3508),
+                         background_image=Image.open(get_file(suffix=".png"))
+                         if "y" in input("Add a Background to a paper? [y/n]\n> ") else None)
     # paper.show()
     x, y = x_margin, y_margin
     prev_char = None
@@ -165,7 +169,8 @@ def main():
     root = tkinter.Tk()
     root.attributes("-topmost", 1)
     root.withdraw()
-    paper_path = filedialog.askdirectory() + "/HW_" + str(pathlib.Path(file_path).stem) + ".png"
+    paper_path = filedialog.askdirectory() + "/HW_" + str(pathlib.Path(file_path).stem) \
+                 + str(random.randint(0000, 1000)) + ".png"
     root.destroy()
 
     # If no location was selected, don't save
