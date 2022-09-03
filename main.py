@@ -77,13 +77,24 @@ def get_char_image(char: str) -> Optional[Image]:
         print(f"'{char}' file not found.")
 
 
+def place_on_paper(char: Image, coords: Tuple[int, int], paper: Image) -> Image:
+    """
+    Place a smaller image (`char`) on a larger image (`paper`) at the given coordinates (`coords`)
+
+    :param char: The smaller image of a char
+    :param coords: The coordinates, where to place the char image
+    :param paper: The paper/main image where to place the char
+    """
+    return paper.paste(char, coords)
+
+
 def main():
     paper = create_paper()
     paper.show()
     contents: List[str] = read_file(get_file())
     for paragraph in contents:
         for char in paragraph:
-            get_char_image(char=char)
+            char: str = get_char_image(char=char)
 
 
 if __name__ == '__main__':
