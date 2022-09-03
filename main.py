@@ -138,22 +138,24 @@ def main():
     paper = create_paper(size=(2480, 3508))
     # paper.show()
     x, y = x_margin, y_margin
+    prev_char = None
     file_path = get_file()
     contents: List[str] = read_file(file_path)
     for n, paragraph in enumerate(contents):
         y += new_line
         x = x_margin
         for char in paragraph.strip():
-            x += kerning
+            x += prev_char.width if prev_char else kerning
             if x >= paper_size[0] - x_margin:
                 y += new_line
                 x = x_margin
                 continue
-            char: str = get_char_image(char=char)
+            char: Image = get_char_image(char=char)
             if char == "space":
                 x += kerning
                 continue
             place_on_paper(char=char, coords=(x, y), paper=paper)
+            prev_char: Image = char
         progress_update(current=n, full=len(contents))
     print(" " * 80, end="\r")
 
