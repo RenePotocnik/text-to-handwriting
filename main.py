@@ -15,7 +15,7 @@ misc_chars: Dict[str, str] = {
             }
 
 
-def create_paper(size: Tuple[int, int] = (2480, 3508)):
+def create_paper(size: Tuple[int, int]):
     return Image.new("RGBA", size, color="white")
 
 
@@ -34,6 +34,26 @@ def get_file() -> str:
     # Clear the last line
     print(" " * 20, end="\r")
     return file_path
+
+
+def progress_update(current: int, full: int, prefix='Progress', suffix='', length=50) -> None:
+    """
+    Display a progress bar in the console
+    :param current: The `y` value of the image
+    :param full: The image
+    :param prefix: Optional: Text in-front of the progress bar
+    :param suffix: Optional: Text behind the progress bar
+    :param length: Optional: The length of the progress bar
+    """
+    completed = int(length * current // full)
+    empty = length - completed
+    bar = "#" * completed + " " * empty
+    percent = f"{100 * (current / float(full)):.2f}"
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end="\r")
+
+    # Print New Line on Complete
+    if current == full:
+        print(" " * (length + 30), end="\r")
 
 
 def read_file(file_path: str) -> List[str]:
@@ -68,7 +88,16 @@ def get_char_image(char: str) -> Optional['Image']:
             path: str = f"{pathlib.Path(__file__).parent}\\Characters\\misc\\{char}\\{pic}.png"
         elif char in '.?"/':
             pic: int = random.randint(1, pic_amount)
-            path: str = f"{pathlib.Path(__file__).parent}\\Characters\\misc\\{char}\\{pic}.png"
+            if char == ".":
+                path: str = f"{pathlib.Path(__file__).parent}\\Characters\\misc\\dot\\{pic}.png"
+            elif char == "?":
+                path: str = f"{pathlib.Path(__file__).parent}\\Characters\\misc\\question\\{pic}.png"
+            elif char == '"':
+                path: str = f"{pathlib.Path(__file__).parent}\\Characters\\misc\\quote\\{pic}.png"
+            elif char == "/":
+                path: str = f"{pathlib.Path(__file__).parent}\\Characters\\misc\\slash\\{pic}.png"
+            else:
+                path: str = f"{pathlib.Path(__file__).parent}\\Characters\\misc\\{char}\\{pic}.png"
         elif char == " ":
             return "space"
         else:
@@ -88,32 +117,61 @@ def place_on_paper(char: Image, coords: Tuple[int, int], paper: Image):
     :param coords: The coordinates, where to place the char image
     :param paper: The paper/main image where to place the char
     """
-    paper.paste(im=char, box=coords, mask=char)
+    char_height: int = 50
+    kerning_variation: int = 5
+    height_variation: int = 5
+    x: int = coords[0] + random.randint(int(f"-{kerning_variation}"), kerning_variation)
+    y: int = coords[1] + abs(char_height - char.height) + random.randint(int(f"-{height_variation}"), height_variation)
+
+    paper.paste(im=char, box=(x, y), mask=char)
     # Image.Image.paste(paper, char, coords, char)
 
 
 def main():
     kerning: int = 30  # Spacing between individual letters
-    new_line: int = 40  # Spacing between lines
-    x_margin: int = 50  # Side margin
-    y_margin: int = 50  # Top margin
+    new_line: int = 70  # Spacing between lines
+    x_margin: int = 100  # Side margin
+    y_margin: int = 100  # Top margin
 
-    paper = create_paper()
+    paper_size: Tuple[int, int] = (2480, 3508)  # Size of the main paper in pixels (A4)
+
+    paper = create_paper(size=(2480, 3508))
     # paper.show()
     x, y = x_margin, y_margin
-    contents: List[str] = read_file(get_file())
-    for paragraph in contents:
+    file_path = get_file()
+    contents: List[str] = read_file(file_path)
+    for n, paragraph in enumerate(contents):
         y += new_line
         x = x_margin
         for char in paragraph.strip():
             x += kerning
+            if x >= paper_size[0] - x_margin:
+                y += new_line
+                x = x_margin
+                continue
             char: str = get_char_image(char=char)
             if char == "space":
                 x += kerning
                 continue
             place_on_paper(char=char, coords=(x, y), paper=paper)
+        progress_update(current=n, full=len(contents))
+    print(" " * 80, end="\r")
 
     paper.show()
+
+    # Get save location
+    root = tkinter.Tk()
+    root.attributes("-topmost", 1)
+    root.withdraw()
+    paper_path = filedialog.askdirectory() + "/HW_" + str(pathlib.Path(file_path).stem) + ".png"
+    root.destroy()
+
+    # If no location was selected, don't save
+    if paper_path[0] == "/":
+        print("Closing without saving.")
+        return
+    paper.save(paper_path)
+    print("Image saved to ", paper_path)
 
 
 if __name__ == '__main__':
