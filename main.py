@@ -1,5 +1,7 @@
+import datetime
 import pathlib
 import random
+import time
 import tkinter
 from tkinter import filedialog
 from typing import List, Tuple, Dict, Optional
@@ -148,10 +150,10 @@ def save_pages(pages: List[any], file_path: str) -> None:
     if not paper_path_template:
         print("Closing without saving.")
         return
-    paper_path_template += f"/HW_{pathlib.Path(file_path).stem}_{{}}.png"
+    paper_path_template += f"/HW_{pathlib.Path(file_path).stem}_pages-{{page:}}{{time:%m%d%H%M%S}}.png"
     for n, page in enumerate(pages):
-        page.save(paper_path_template.format(n))
-    print("Pages saved to ", paper_path_template.format(f"0 - {len(pages)}"))
+        page.save(paper_path_template.format(page=n, time=datetime.datetime.now()))
+    print("Pages saved to ", paper_path_template.format(page=f"0 - {len(pages)}", time=""))
 
 
 def main():
@@ -163,10 +165,11 @@ def main():
 
     paper_size: Tuple[int, int] = (2480, 3508)  # Size of the main paper in pixels (A4)
 
-    paper_background: bool = "y" in input("Add a Background to a paper? [y/n]\n> ")
+    background_image = None
+    if "y" in input("Add a Background to a paper? [y/n]\n> ").lower():
+        background_image = Image.open(get_file(suffix=".png"))
     pages: List[Image] = [create_paper(size=(2480, 3508),
-                                       background_image=Image.open(get_file(suffix=".png"))
-                                       if paper_background else None)]
+                                       background_image=background_image)]
     cur_page: int = 0
     file_path = get_file()
     contents: List[str] = read_file(file_path)
@@ -174,8 +177,7 @@ def main():
     def if_new_page() -> bool:
         if y >= paper_size[1] - y_margin:
             pages.append(create_paper(size=(2480, 3508),
-                                      background_image=Image.open(get_file(suffix=".png"))
-                                      if paper_background else None))
+                                      background_image=background_image))
             return True
         return False
 
