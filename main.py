@@ -128,7 +128,7 @@ def place_on_paper(char: Image, coords: Tuple[int, int], paper: Image, letter: s
     x: int = coords[0] + random.randint(int(f"-{kerning_variation}"), kerning_variation)
     y: int = coords[1] + abs(char_height - char.height) + random.randint(int(f"-{height_variation}"), height_variation)
 
-    if letter in "pgjy":
+    if letter in "pgjy,":
         y: int = coords[1] + abs(char_height - int(char.height / 2))\
                  + random.randint(int(f"-{height_variation}"), height_variation)
 
@@ -155,7 +155,7 @@ def save_pages(pages: List[any], file_path: str) -> None:
     if not paper_path_template:
         print("Closing without saving.")
         return
-    paper_path_template += f"/HW_{pathlib.Path(file_path).stem}_pages-{{page:}}{{time:%m%d%H%M%S}}.png"
+    paper_path_template += f"/HW_{pathlib.Path(file_path).stem}_pages-{{page:}}{{time:%H-%M-%S}}.png"
     for n, page in enumerate(pages):
         page.save(paper_path_template.format(page=n, time=datetime.datetime.now()))
     print("Pages saved to ", paper_path_template.format(page=f"0-{len(pages)}_", time=datetime.datetime.now()))
@@ -172,6 +172,7 @@ def main():
 
     background_image = None
     if "y" in input("Add a Background to a paper? [y/n]\n> ").lower():
+        print("Select a paper background image. Must be '2480x3508'.")
         background_image = Image.open(get_file(suffix=".png"))
     pages: List[Image] = [create_paper(size=(2480, 3508),
                                        background_image=background_image)]
