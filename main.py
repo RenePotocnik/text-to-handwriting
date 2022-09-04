@@ -130,8 +130,9 @@ def place_on_paper(char: Image, coords: Tuple[int, int], paper: Image):
 
 
 def main():
-    kerning: int = 30  # Spacing between individual letters
+    avg_char_width: int = 30  # The average width of a char
     new_line: int = 70  # Spacing between lines
+    word_spacing: int = 40  # Spacing between individual words or letters
     x_margin: int = 100  # Side margin
     y_margin: int = 100  # Top margin
 
@@ -145,20 +146,21 @@ def main():
     prev_char = None
     file_path = get_file()
     contents: List[str] = read_file(file_path)
-    for n, paragraph in enumerate(contents):
-        y += new_line
-        x = x_margin
-        for char in paragraph.strip():
-            x += prev_char.width if prev_char else kerning
-            if x >= paper_size[0] - x_margin:
+
+    x: int = x_margin
+    y: int = y_margin
+    for n, line in enumerate(contents):
+        for word in line.strip().split(" "):
+            if len(word) * avg_char_width + x >= paper_size[0] - x_margin:
                 y += new_line
                 x = x_margin
-            char: Image = get_char_image(char=char)
-            if char == "space":
-                x += kerning
-                continue
-            place_on_paper(char=char, coords=(x, y), paper=paper)
-            prev_char: Image = char
+            for char in word:
+                char_img: Image = get_char_image(char=char)
+                place_on_paper(char=char_img, coords=(x, y), paper=paper)
+                x += char_img.width
+            x += word_spacing
+        y += new_line
+        x = x_margin
         progress_update(current=n, full=len(contents))
     print(" " * 80, end="\r")
 
