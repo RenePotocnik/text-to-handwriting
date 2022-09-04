@@ -113,19 +113,24 @@ def get_char_image(char: str) -> Optional['Image']:
         print(f"'{char}' file not found.")
 
 
-def place_on_paper(char: Image, coords: Tuple[int, int], paper: Image):
+def place_on_paper(char: Image, coords: Tuple[int, int], paper: Image, letter: str = None):
     """
     Place a smaller image (`char`) on a larger image (`paper`) at the given coordinates (`coords`)
 
     :param char: The smaller image of a char
     :param coords: The coordinates, where to place the char image
     :param paper: The paper/main image where to place the char
+    :param letter: The current letter, used to determine letter position (e.g.: g, j have to be placed further down)
     """
     char_height: int = 50
     kerning_variation: int = 5
     height_variation: int = 5
     x: int = coords[0] + random.randint(int(f"-{kerning_variation}"), kerning_variation)
     y: int = coords[1] + abs(char_height - char.height) + random.randint(int(f"-{height_variation}"), height_variation)
+
+    if letter in "pgjy":
+        y: int = coords[1] + abs(char_height - int(char.height / 2))\
+                 + random.randint(int(f"-{height_variation}"), height_variation)
 
     paper.paste(im=char, box=(x, y), mask=char)
     # Image.Image.paste(paper, char, coords, char)
@@ -153,7 +158,7 @@ def save_pages(pages: List[any], file_path: str) -> None:
     paper_path_template += f"/HW_{pathlib.Path(file_path).stem}_pages-{{page:}}{{time:%m%d%H%M%S}}.png"
     for n, page in enumerate(pages):
         page.save(paper_path_template.format(page=n, time=datetime.datetime.now()))
-    print("Pages saved to ", paper_path_template.format(page=f"0 - {len(pages)}", time=""))
+    print("Pages saved to ", paper_path_template.format(page=f"0-{len(pages)}_", time=datetime.datetime.now()))
 
 
 def main():
@@ -194,7 +199,7 @@ def main():
                     x = x_margin
             for char in word:
                 char_img: Image = get_char_image(char=char)
-                place_on_paper(char=char_img, coords=(x, y), paper=pages[cur_page])
+                place_on_paper(char=char_img, coords=(x, y), paper=pages[cur_page], letter=char)
                 x += char_img.width
             x += word_spacing
         y += new_line
