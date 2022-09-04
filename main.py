@@ -65,7 +65,7 @@ def read_file(file_path: str) -> List[str]:
     :param file_path: Location of `.txt` file
     :return: List of read lines
     """
-    with open(file_path, "r") as file:
+    with open(file_path, "r", encoding="UTF-8") as file:
         contents: List[str] = file.readlines()
     return contents
 
@@ -129,6 +129,31 @@ def place_on_paper(char: Image, coords: Tuple[int, int], paper: Image):
     # Image.Image.paste(paper, char, coords, char)
 
 
+def save_pages(pages: List[any], file_path: str) -> None:
+    """
+    Prompt user to select folder to save pages.
+    If multiple pages, save in following format: `{file_name}_{page_number}.png`
+
+    :param pages: A list of all the pages
+    :param file_path: The file path where to save the pages
+    """
+    # Get save location
+    root = tkinter.Tk()
+    root.attributes("-topmost", 1)
+    root.withdraw()
+    paper_path_template = filedialog.askdirectory()
+    root.destroy()
+
+    # If no location was selected, don't save
+    if not paper_path_template:
+        print("Closing without saving.")
+        return
+    paper_path_template += f"/HW_{pathlib.Path(file_path).stem}_{{}}.png"
+    for n, page in enumerate(pages):
+        page.save(paper_path_template.format(n))
+    print("Pages saved to ", paper_path_template.format(f"0 - {len(pages)}"))
+
+
 def main():
     avg_char_width: int = 30  # The average width of a char
     new_line: int = 70  # Spacing between lines
@@ -138,14 +163,21 @@ def main():
 
     paper_size: Tuple[int, int] = (2480, 3508)  # Size of the main paper in pixels (A4)
 
-    paper = create_paper(size=(2480, 3508),
-                         background_image=Image.open(get_file(suffix=".png"))
-                         if "y" in input("Add a Background to a paper? [y/n]\n> ") else None)
-    # paper.show()
-    x, y = x_margin, y_margin
-    prev_char = None
+    paper_background: bool = "y" in input("Add a Background to a paper? [y/n]\n> ")
+    pages: List[Image] = [create_paper(size=(2480, 3508),
+                                       background_image=Image.open(get_file(suffix=".png"))
+                                       if paper_background else None)]
+    cur_page: int = 0
     file_path = get_file()
     contents: List[str] = read_file(file_path)
+
+    def if_new_page() -> bool:
+        if y >= paper_size[1] - y_margin:
+            pages.append(create_paper(size=(2480, 3508),
+                                      background_image=Image.open(get_file(suffix=".png"))
+                                      if paper_background else None))
+            return True
+        return False
 
     x: int = x_margin
     y: int = y_margin
@@ -154,32 +186,25 @@ def main():
             if len(word) * avg_char_width + x >= paper_size[0] - x_margin:
                 y += new_line
                 x = x_margin
+                if if_new_page():
+                    cur_page += 1
+                    y = y_margin
+                    x = x_margin
             for char in word:
                 char_img: Image = get_char_image(char=char)
-                place_on_paper(char=char_img, coords=(x, y), paper=paper)
+                place_on_paper(char=char_img, coords=(x, y), paper=pages[cur_page])
                 x += char_img.width
             x += word_spacing
         y += new_line
         x = x_margin
+        if if_new_page():
+            cur_page += 1
+            y = y_margin
+            x = x_margin
         progress_update(current=n, full=len(contents))
     print(" " * 80, end="\r")
 
-    paper.show()
-
-    # Get save location
-    root = tkinter.Tk()
-    root.attributes("-topmost", 1)
-    root.withdraw()
-    paper_path = filedialog.askdirectory() + "/HW_" + str(pathlib.Path(file_path).stem) \
-                 + str(random.randint(0000, 1000)) + ".png"
-    root.destroy()
-
-    # If no location was selected, don't save
-    if paper_path[0] == "/":
-        print("Closing without saving.")
-        return
-    paper.save(paper_path)
-    print("Image saved to ", paper_path)
+    save_pages(pages=pages, file_path=file_path)
 
 
 if __name__ == '__main__':
