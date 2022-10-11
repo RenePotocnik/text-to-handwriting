@@ -161,6 +161,7 @@ def save_pages(pages: List[any], file_path: str) -> None:
     """
     Prompt user to select folder to save pages.
     If multiple pages, save in following format: `{file_name}_{page_number}.png`
+    General save format: `{path}/HW_{file_name}_{page}-{time}`
 
     :param pages: A list of all the pages
     :param file_path: The file path where to save the pages
