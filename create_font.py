@@ -3,6 +3,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+from matplotlib import pyplot as plt
 
 SUPPORTED_CHARS: str = (
     "abcčdefghijklmnopqrsštuvwxyzž"
@@ -40,15 +41,11 @@ def show_image(name, current_image, wait: bool = False):
 
 
 def main():
-    image = cv2.imread(r"G:\My Drive\Programs\text-to-handwriting\Character_Grid.png")
-    show_image("Original image", image, wait=True)
+    og_image = cv2.imread(r"G:\My Drive\Programs\text-to-handwriting\Character_Grid.png")
+    show_image("Original image", og_image, wait=True)
 
     # Make grayscale
-    og_image = image
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    # kernel = np.ones((5, 5), np.uint8)
-    # image = cv2.morphologyEx(image, cv2.MORPH_BLACKHAT, kernel)
+    image = cv2.cvtColor(og_image, cv2.COLOR_BGR2GRAY)
 
     # Slightly blur the image
     image = cv2.medianBlur(image, 3)
@@ -61,14 +58,11 @@ def main():
     thresh = cv2.adaptiveThreshold(src=image, maxValue=255, adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                    thresholdType=cv2.THRESH_BINARY, blockSize=61, C=20)
 
-    kernel = np.ones((7, 7), np.uint8)
-    gradient = cv2.morphologyEx(thresh, cv2.MORPH_GRADIENT, kernel)
-    contours, hierarchy = cv2.findContours(gradient, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(og_image, contours, -1, (0, 255, 0), 2)
+    image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
 
-    show_image("New Image", og_image)
+    show_image("New Image", image)
 
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
 
 
 main()
