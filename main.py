@@ -52,17 +52,18 @@ def get_file(suffix: str = ".txt") -> str:
 def progress_update(current: int, full: int, prefix='Progress', suffix='', length=50) -> None:
     """
     Display a progress bar in the console
-    :param current: The `y` value of the image
-    :param full: The image
-    :param prefix: Optional: Text in-front of the progress bar
-    :param suffix: Optional: Text behind the progress bar
-    :param length: Optional: The length of the progress bar
+
+    :param current: The current value
+    :param full: The full value
+    :param prefix: Text in-front of the progress bar
+    :param suffix: Text behind the progress bar
+    :param length: The length of the progress bar
     """
     completed = int(length * current // full)
-    empty = length - completed
-    bar = "#" * completed + " " * empty
-    percent = f"{100 * (current / float(full)):.2f}"
-    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end="\r")
+    print(f'\r{prefix}'
+          f' |{"#" * completed + " " * (length - completed)}| '
+          f'{f"{100 * (current / float(full)):.2f}"}% '
+          f'{suffix}', end="\r")
 
     # Print New Line on Complete
     if current == full:
