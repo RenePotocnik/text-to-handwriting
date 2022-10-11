@@ -8,6 +8,7 @@ from typing import List, Tuple, Dict, Optional
 
 from PIL import Image
 
+# Characters that cannot be inside a file path
 misc_chars: Dict[str, str] = {
     ".": "dot",
     "?": "question",
@@ -16,24 +17,32 @@ misc_chars: Dict[str, str] = {
 }
 
 
-def create_paper(size: Tuple[int, int], background_image=None):
+def create_paper(size: Tuple[int, int], background_image=None) -> Image:
+    """
+    Create a white PIL Image object, of specified size.
+
+    :param size: The size of the paper
+    :param background_image: OPTIONAL; The background image of the paper. THe image will be resized to paper `size`
+    :return: The paper - PIL.Image
+    """
     paper: Image = Image.new("RGBA", size, color="white")
+    # If there's a background image, resize it to the same size as the paper
     if background_image:
-        paper.paste(background_image)
+        paper.paste(background_image.scale(size))
     return paper
 
 
 def get_file(suffix: str = ".txt") -> str:
     """
-    Open file explorer, wait for user to open a `.txt` file
+    Open file explorer, wait for user to open a `suffix` file
 
-    :return: The `.txt` file directory
+    :return: The selected file directory
     """
-    print("Open a `.txt` file.", end="\r")
+    print(f"Open a `{suffix}` file.", end="\r")
     root = tkinter.Tk()
-    root.withdraw()
     root.attributes("-topmost", 1)
-    file_path: str = filedialog.askopenfilename(filetypes=[("Text File", f"*{suffix}")])
+    root.withdraw()
+    file_path: str = filedialog.askopenfilename(filetypes=[("Select File", f"*{suffix}")])
     root.destroy()
     # Clear the last line
     print(" " * 20, end="\r")
