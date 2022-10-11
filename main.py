@@ -142,12 +142,13 @@ def place_on_paper(char: Image, coords: Tuple[int, int], paper: Image, letter: s
     :param paper: The paper/main image where to place the char
     :param letter: The current letter, used to determine letter position (e.g.: g, j have to be placed further down)
     """
-    char_height: int = 50
-    kerning_variation: int = 5
-    height_variation: int = 5
+    char_height: int = 50  # The average height of the char - to align them to the bottom of a line
+    kerning_variation: int = 5  # How much should the letters vary in horizontal placement - makes it more realistic
+    height_variation: int = 5  # How much should the letters vary in vertical placement - makes it more realistic
     x: int = coords[0] + random.randint(int(f"-{kerning_variation}"), kerning_variation)
     y: int = coords[1] + abs(char_height - char.height) + random.randint(int(f"-{height_variation}"), height_variation)
 
+    # If the letter has a "tail", place it lower on the line
     if letter in "pgjy,":
         y: int = coords[1] + abs(char_height - int(char.height / 2))\
                  + random.randint(int(f"-{height_variation}"), height_variation)
