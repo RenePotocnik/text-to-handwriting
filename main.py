@@ -83,25 +83,32 @@ def read_file(file_path: str) -> List[str]:
 
 
 def get_char_image(char: str) -> Optional['Image']:
+    """
+    Locate the image of the passed `char`. Return a png PIL.Image of the char
+
+    :param char: The character whose image were searching for
+    :return:
+    """
     pic_amount: int = 4  # Amount of pictures of each char
     # There's `pic_amount * 2` pictures of each char in each folder
-    # The first `pic_amount` images are for uppercase and the last `pic_amount` images are for lowercase letters
+    # The first half are for uppercase letters, the second half are for lowercase letters
+    pic: int = random.randint(1, pic_amount)  # Pick a random image
     try:
         # Check if character is a number
         if char.isdigit():
-            pic: int = random.randint(1, pic_amount)
             path: str = f"{pathlib.Path(__file__).parent}\\Characters\\numbers\\{char}\\{pic}.png"
+
         # Check if character is a letter
         elif char.isalpha():
-            pic: int = random.randint(1, pic_amount) if char.isupper() else \
-                random.randint(pic_amount + 1, pic_amount * 2)
-            path: str = f"{pathlib.Path(__file__).parent}\\Characters\\letters\\{char.upper()}\\{pic}.png"
-        # Check if character is one of the `misc` chars
+            path: str = f"{pathlib.Path(__file__).parent}\\Characters\\letters\\{char.upper()}\\" \
+                        f"{pic if char.isupper() else random.randint(pic_amount + 1, pic_amount * 2)}.png"
+
+        # Check if character is one of the chars that can be included in a file path
         elif char in "!,-":
-            pic: int = random.randint(1, pic_amount)
             path: str = f"{pathlib.Path(__file__).parent}\\Characters\\misc\\{char}\\{pic}.png"
-        elif char in '.?"/':
-            pic: int = random.randint(1, pic_amount)
+
+        # Check if character is one of the chars in `misc_chars` - cannot be in file path
+        elif char in misc_chars:
             if char == ".":
                 path: str = f"{pathlib.Path(__file__).parent}\\Characters\\misc\\dot\\{pic}.png"
             elif char == "?":
@@ -115,12 +122,15 @@ def get_char_image(char: str) -> Optional['Image']:
         elif char == " ":
             return "space"
         else:
-            print(f"Unknown character: '{char}'")
+            # The char could not be sorted into one of the groups - unknown character
+            print(f"Unknown character: '{char}'.")
             return None
+        # Open and return the image of the char
         return Image.open(path)
 
+    # The file of the char was not found though it did fit in one of the categories
     except FileNotFoundError:
-        print(f"'{char}' file not found.")
+        print(f"'{char}' not found")
 
 
 def place_on_paper(char: Image, coords: Tuple[int, int], paper: Image, letter: str = None):
