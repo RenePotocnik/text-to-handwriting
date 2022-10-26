@@ -123,14 +123,14 @@ def get_char_image(char: str) -> Optional['Image']:
             return "space"
         else:
             # The char could not be sorted into one of the groups - unknown character
-            print(f"Unknown character: '{char}'.")
+            print(f"Unknown character: '{char}'." + " " * 50)
             return None
         # Open and return the image of the char
         return Image.open(path)
 
     # The file of the char was not found though it did fit in one of the categories
     except FileNotFoundError:
-        print(f"'{char}' not found")
+        print(f"'{char}' not found" + " " * 50)
 
 
 def place_on_paper(char: Image, coords: Tuple[int, int], paper: Image, letter: str = None):
